@@ -41,7 +41,7 @@ File Recovery - new in v0.2
 
 ## Warning 
 
-Consider this code as Proof-of-Concept. I had 3 hours to write it and used it for the single purpose of decrypting a sample related to the Mustang Panda threat group, but thought that it could be helpful to have such a script for other XORed executables. 
+Consider this code as Proof-of-Concept. I had 3 hours to write it and used it for the single purpose of decrypting a sample related to the Mustang Panda threat group [[1]](https://app.threatconnect.com/auth/indicators/details/file.xhtml?file=1055EAF96CEAAB38F082068B7382D27E2F944595666FC7AA2BB4B32073A1D668&owner=Common%20Community#/) [[2]](https://blog.malwarebytes.com/threat-analysis/2020/06/multi-stage-apt-attack-drops-cobalt-strike-using-malleable-c2-feature/), but thought that it could be helpful to have such a script for other XORed executables. 
 
 If you have more time to spend and decide to build something similar or better, please let me know.
 
