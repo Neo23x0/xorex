@@ -172,7 +172,7 @@ def decrypt_pe(input_file, valid_keys, output_path):
         marker = ""
         color = Fore.BLUE
         if not test_pe(decrypted_data):
-            print("The resulting PE file seems to be invalid - writing it nonetheless to disk for your to examine")
+            print("The resulting PE file seems to be invalid - writing it nonetheless to disk for you to examine it")
             marker = "_likely_INVALID"
             color = Fore.RED
         # Create a file name in the output path
@@ -181,7 +181,7 @@ def decrypt_pe(input_file, valid_keys, output_path):
             vk["key"],
             marker
         ))
-        print("Drecrypting file with key '%s' and offset '%d' ..." % (vk["key"], vk["mz_offset"]))
+        print("Decrypting file with key '%s' and offset '%d' ..." % (vk["key"], vk["mz_offset"]))
         # Generate hash
         data_hash = hashlib.md5(decrypted_data).hexdigest()
         if data_hash not in known_hashes:
