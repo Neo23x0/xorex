@@ -242,7 +242,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='XOR Key Extractor')
     parser.add_argument('-f', help='Path to input file', metavar='input_file')
     parser.add_argument('-w', help='Window Size (max. XOR key size)', metavar='max-window-size', default=10)
-    parser.add_argument('-m', help='Maximum look into the file', metavar='max-offset', default=2048)
+    parser.add_argument('-m', help='Maximum look into the file', metavar='max-offset', default=10240)
     parser.add_argument('-o', help='Output Path for decrypted PE files', metavar='output-path', default="./output")
 
     parser.add_argument('--debug', action='store_true', default=False, help='Debug output')
