@@ -4,6 +4,14 @@ XOR Key Evaluator for Encrypted Executables
 
 ## Usage
 
+       _  ______  ___  _____  __
+      | |/_/ __ \/ _ \/ __/ |/_/
+     _>  </ /_/ / , _/ _/_>  <
+    /_/|_|\____/_/|_/___/_/|_|
+
+    XOR Key Evaluator for Encrypted Executables
+    Florian Roth, July 2020, 0.2.0
+
     usage: xorex.py [-h] [-f input_file] [-w max-window-size] [-m max-offset] [-o output-path] [--debug]
     
     XOR Key Extractor
