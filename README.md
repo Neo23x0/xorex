@@ -4,17 +4,17 @@ XOR Key Evaluator for Encrypted Executables
 
 ## Usage
 
-    usage: xorex.py [-h] [-f input files [input files ...]] [-w max-window-size] [-m max-offset] [--debug]
+    usage: xorex.py [-h] [-f input_file] [-w max-window-size] [-m max-offset] [-o output-path] [--debug]
     
     XOR Key Extractor
     
     optional arguments:
-      -h, --help            show this help message and exit
-      -f input files [input files ...]
-                            Path to input files
-      -w max-window-size    Window Size (max. XOR key size)
-      -m max-offset         Maximum look into the file
-      --debug               Debug output
+      -h, --help          show this help message and exit
+      -f input_file       Path to input file
+      -w max-window-size  Window Size (max. XOR key size)
+      -m max-offset       Maximum look into the file
+      -o output-path      Output Path for decrypted PE files
+      --debug             Debug output
       
 ## The Idea
 
@@ -30,7 +30,9 @@ Furthermore, I then try to find a MZ header in order to detect junk code or shel
 
 ![Screen 2](/screens/screen2.png)
 
-![Screen 3](/screens/screen3.png)
+File Recovery - new in v0.2
+
+![Screen 4](/screens/screen4.png)
 
 ## Known Issues
 

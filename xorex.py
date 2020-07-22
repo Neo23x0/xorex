@@ -6,11 +6,15 @@
 # Florian Roth
 #
 
+import os
 import argparse
 import collections
+import hashlib
+import pefile
+import traceback
 from colorama import init, Fore, Back, Style
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 KNOWN_STRINGS = [b'This program', b'DOS mode']
 
@@ -81,6 +85,7 @@ def evaluate_keys(input_file, all_stats):
     # Read file
     print("\n" + Fore.BLACK + Back.WHITE + "=== Brute Forcing with the Evaluated Keys " + Style.RESET_ALL)
     fdata = []
+    valid_keys = []
     with open(input_file, 'rb') as fh:
         fdata = fh.read()
     # Try to decrypt the strings
@@ -99,12 +104,16 @@ def evaluate_keys(input_file, all_stats):
                     if s in decrypted_code:
                         print("FOUND STRING IN DECRYPTED CODE WITH KEY: %s" % get_key_string(key))
                         print("DATA: '%s' OFFSET: %d DECRYPTED: '%s'" % (fdata[i:(i+ws)].hex(), i, decrypted_code.decode()))
+                        valid_keys.append({"key": key, "mz_offset": 0})
                         # Try to determin junk data before the MZ header
                         mz_offset, rotated_key = find_mz_with_key(fdata[:i], key)
                         if rotated_key and mz_offset > 0:
                             print("It seems that the file has some kind of prefix (shellcode, junk etc.)")
                             print("Found MZ header at offset: %d" % mz_offset)
                             print("Adjusted XOR key to: %s" % get_key_string(rotated_key))
+                            valid_keys.append({"key": rotated_key, "mz_offset": mz_offset})
+    # Return the valid keys
+    return valid_keys
 
 
 def get_key_string(key):
@@ -136,6 +145,67 @@ def find_mz_with_key(fdata, key):
             if b'MZ' == decrypted_code:
                 return i, key_val
     return 0, ''
+
+
+def decrypt_pe(input_file, valid_keys, output_path):
+    """
+    Decrypt the data blob and create files
+    :param input_file:
+    :param valid_keys:
+    :param output_path:
+    :return:
+    """
+    # We avoid the decryption of a duplicate files
+    known_hashes = []
+
+    print("\n" + Fore.BLACK + Back.WHITE + "=== Original File Recovery " + Style.RESET_ALL)
+    with open(input_file, 'rb') as fh:
+        fdata = fh.read()
+    # Create output folder of not exists
+    if not os.path.exists(output_path):
+        os.makedirs(output_path)
+    # Try the different keys
+    for vk in valid_keys:
+        # Decrypt the data
+        decrypted_data = de_xor(fdata[vk["mz_offset"]:], bytearray.fromhex(vk["key"]))
+        # Test the resulting PE
+        marker = ""
+        color = Fore.BLUE
+        if not test_pe(decrypted_data):
+            print("The resulting PE file seems to be invalid - writing it nonetheless to disk for your to examine")
+            marker = "_likely_INVALID"
+            color = Fore.RED
+        # Create a file name in the output path
+        filename = os.path.join(output_path, "%s_decrypted_%s%s.exe" % (
+            os.path.splitext(os.path.basename(input_file))[0],
+            vk["key"],
+            marker
+        ))
+        print("Drecrypting file with key '%s' and offset '%d' ..." % (vk["key"], vk["mz_offset"]))
+        # Generate hash
+        data_hash = hashlib.md5(decrypted_data).hexdigest()
+        if data_hash not in known_hashes:
+            print("Writing possible original file to " + color + "'%s'" % filename + Style.RESET_ALL + " ...")
+            with open(filename, 'wb') as fh:
+                fh.write(decrypted_data)
+            known_hashes.append(data_hash)
+        else:
+            print("This file would be a duplicate. Skipping the output.")
+
+
+def test_pe(fdata):
+    """
+    Test a PE file
+    :param fdata:
+    :return:
+    """
+    try:
+        pe = pefile.PE(data=fdata)
+    except pefile.PEFormatError as e:
+        if args.debug:
+            traceback.print_exc()
+        return 0
+    return 1
 
 
 def get_ascii(key_bytes):
@@ -170,10 +240,11 @@ if __name__ == '__main__':
     init(autoreset=False)
     # Parse Arguments
     parser = argparse.ArgumentParser(description='XOR Key Extractor')
-    parser.add_argument('-f', action='append', nargs='+', help='Path to input files',
-                        metavar='input files')
+    parser.add_argument('-f', help='Path to input file', metavar='input_file')
     parser.add_argument('-w', help='Window Size (max. XOR key size)', metavar='max-window-size', default=10)
     parser.add_argument('-m', help='Maximum look into the file', metavar='max-offset', default=2048)
+    parser.add_argument('-o', help='Output Path for decrypted PE files', metavar='output-path', default="./output")
+
     parser.add_argument('--debug', action='store_true', default=False, help='Debug output')
 
     args = parser.parse_args()
@@ -191,6 +262,7 @@ if __name__ == '__main__':
     print(" ".ljust(80) + Style.RESET_ALL)
     print(" ")
 
-    all_stats = extract_byte_chains(args.f[0][0], args.w)
-    print_guesses(all_stats)
-    evaluate_keys(args.f[0][0], all_stats)
+    all_stats = extract_byte_chains(input_file=args.f, window_size_max=args.w)
+    print_guesses(all_stats=all_stats)
+    valid_keys = evaluate_keys(input_file=args.f, all_stats=all_stats)
+    decrypt_pe(input_file=args.f, valid_keys=valid_keys, output_path=args.o)
