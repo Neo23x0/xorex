@@ -32,6 +32,13 @@ I validate the possible candidates by applying them to a portion of the data blo
 
 Furthermore, I then try to find a MZ header in order to detect junk code or shellcode before the actual PE file, adjusting the offset and rotating the preliminary XOR key to its more likely version. 
 
+## Get Started
+
+1. Git clone the repo and cd into it `git clone https://github.com/Neo23x0/xorex.git && cd xorex`
+2. Install requirements `pip install -r requirements.txt`
+3. Try it with the demo files `python xorex.py -f ./examples/mustang-1.xored`
+4. Check the output files in the `./output` folder
+
 ## Screenshots
 
 ![Screen 1](/screens/screen1.png)
