@@ -7,6 +7,7 @@
 #
 
 import os
+import re
 import argparse
 import collections
 import hashlib
@@ -42,12 +43,30 @@ def extract_byte_chains(input_file, window_size_max=10):
         }
 
         for i in range(0, len(fdata)):
-            byte_chain = fdata[i:(i+ws)].hex()
-            stats['byte_stats'].update([byte_chain])
+            byte_chain = fdata[i:(i+ws)]
+            if is_usable(byte_chain):
+                stats['byte_stats'].update([byte_chain.hex()])
 
         all_stats.append(stats)
 
     return all_stats
+
+
+def is_usable(byte_chain):
+    """
+    Is the byte chain usable as key
+    :param byte_chain:
+    :return:
+    """
+    # Skip zero byte keys
+    only_zeros = True
+    for c in byte_chain:
+        if c != 0x00:
+            only_zeros = False
+    # Not usable
+    if only_zeros:
+        return False
+    return True
 
 
 def xor(data, key):
@@ -90,7 +109,7 @@ def evaluate_keys(input_file, all_stats):
         fdata = fh.read()
     # Try to decrypt the strings
     for s in KNOWN_STRINGS:
-        print("Checking for known string: '%s' in the first %d bytes of the file" % (s.decode(), args.m))
+        print("Checking for known string: '%s' in the first %d bytes of the file" % (s.decode(), int(args.m)))
         ws = len(s)
 
         # Loop over the most common key patterns
@@ -98,7 +117,7 @@ def evaluate_keys(input_file, all_stats):
             most_common = set['byte_stats'].most_common(3)
             for key, count in most_common:
                 # Go over file data and extract chunks in window size
-                for i in range(0, args.m):
+                for i in range(0, int(args.m)):
                     decrypted_code = de_xor(fdata[i:(i + ws)], bytearray.fromhex(key))
                     #print("S: %d E: %d CODE: %s" % (i, i+ws, decrypted_code))
                     if s in decrypted_code:
