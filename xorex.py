@@ -260,7 +260,7 @@ if __name__ == '__main__':
     # Parse Arguments
     parser = argparse.ArgumentParser(description='XOR Key Extractor')
     parser.add_argument('-f', help='Path to input file', metavar='input_file')
-    parser.add_argument('-w', help='Window Size (max. XOR key size)', metavar='max-window-size', default=10)
+    parser.add_argument('-w', help='Window Size (max. XOR key size)', metavar='max-window-size', default=15)
     parser.add_argument('-m', help='Maximum look into the file', metavar='max-offset', default=10240)
     parser.add_argument('-o', help='Output Path for decrypted PE files', metavar='output-path', default="./output")
 
@@ -281,7 +281,7 @@ if __name__ == '__main__':
     print(" ".ljust(80) + Style.RESET_ALL)
     print(" ")
 
-    all_stats = extract_byte_chains(input_file=args.f, window_size_max=args.w)
+    all_stats = extract_byte_chains(input_file=args.f, window_size_max=int(args.w))
     print_guesses(all_stats=all_stats)
     valid_keys = evaluate_keys(input_file=args.f, all_stats=all_stats)
     decrypt_pe(input_file=args.f, valid_keys=valid_keys, output_path=args.o)
