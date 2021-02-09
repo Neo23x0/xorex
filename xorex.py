@@ -94,11 +94,12 @@ def de_xor(data, key):
     return data_decoded
 
 
-def evaluate_keys(input_file, all_stats):
+def evaluate_keys(input_file, all_stats, top_values):
     """
     Try to find valid strings in decrypted data
     :param input_file:
     :param all_stats:
+    :param top_values:
     :return:
     """
     # Read file
@@ -114,7 +115,7 @@ def evaluate_keys(input_file, all_stats):
 
         # Loop over the most common key patterns
         for set in all_stats:
-            most_common = set['byte_stats'].most_common(3)
+            most_common = set['byte_stats'].most_common(top_values)
             for key, count in most_common:
                 # Go over file data and extract chunks in window size
                 for i in range(0, int(args.m)):
@@ -261,6 +262,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='XOR Key Extractor')
     parser.add_argument('-f', help='Path to input file', metavar='input_file')
     parser.add_argument('-w', help='Window Size (max. XOR key size)', metavar='max-window-size', default=15)
+    parser.add_argument('-t', help='Use only to top occurrences', metavar='top-x', default=10)
     parser.add_argument('-m', help='Maximum look into the file', metavar='max-offset', default=10240)
     parser.add_argument('-o', help='Output Path for decrypted PE files', metavar='output-path', default="./output")
 
@@ -277,11 +279,11 @@ if __name__ == '__main__':
     print("   /_/|_|\\____/_/|_/___/_/|_|   ")
     print(" ")
     print("   XOR Key Evaluator for Encrypted Executables")
-    print("   Florian Roth, July 2020, %s " % __version__)
+    print("   Florian Roth, February 2021, %s " % __version__)
     print(" ".ljust(80) + Style.RESET_ALL)
     print(" ")
 
     all_stats = extract_byte_chains(input_file=args.f, window_size_max=int(args.w))
     print_guesses(all_stats=all_stats)
-    valid_keys = evaluate_keys(input_file=args.f, all_stats=all_stats)
+    valid_keys = evaluate_keys(input_file=args.f, all_stats=all_stats, top_values=int(args.t))
     decrypt_pe(input_file=args.f, valid_keys=valid_keys, output_path=args.o)
