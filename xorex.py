@@ -167,12 +167,13 @@ def find_mz_with_key(fdata, key):
     return 0, ''
 
 
-def decrypt_pe(input_file, valid_keys, output_path):
+def decrypt_pe(input_file, valid_keys, output_path, only_valid):
     """
     Decrypt the data blob and create files
     :param input_file:
     :param valid_keys:
     :param output_path:
+    :param only_valid:
     :return:
     """
     # We avoid the decryption of a duplicate files
@@ -193,6 +194,9 @@ def decrypt_pe(input_file, valid_keys, output_path):
         color = Fore.BLUE
         print("Decrypting file with key '%s' and offset '%d' ..." % (vk["key"], vk["mz_offset"]))
         if not test_pe(decrypted_data):
+            if only_valid:
+                print("The resulting PE file seems to be invalid - skipping write (due to --onlyvalid flag)")
+                continue
             print("The resulting PE file seems to be invalid - writing it nonetheless to disk for you to examine it")
             marker = "_likely_INVALID"
             color = Fore.RED
@@ -266,6 +270,7 @@ if __name__ == '__main__':
     parser.add_argument('-m', help='Maximum look into the file', metavar='max-offset', default=10240)
     parser.add_argument('-o', help='Output Path for decrypted PE files', metavar='output-path', default="./output")
 
+    parser.add_argument('--onlyvalid', action='store_true', default=False, help='Only write valid executables')
     parser.add_argument('--debug', action='store_true', default=False, help='Debug output')
 
     args = parser.parse_args()
@@ -286,4 +291,4 @@ if __name__ == '__main__':
     all_stats = extract_byte_chains(input_file=args.f, window_size_max=int(args.w))
     print_guesses(all_stats=all_stats)
     valid_keys = evaluate_keys(input_file=args.f, all_stats=all_stats, top_values=int(args.t))
-    decrypt_pe(input_file=args.f, valid_keys=valid_keys, output_path=args.o)
+    decrypt_pe(input_file=args.f, valid_keys=valid_keys, output_path=args.o, only_valid=args.onlyvalid)
