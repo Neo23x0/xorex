@@ -15,7 +15,7 @@ import pefile
 import traceback
 from colorama import init, Fore, Back, Style
 
-__version__ = "0.2.0"
+__version__ = "0.3.0"
 
 KNOWN_STRINGS = [b'This program', b'DOS mode']
 
