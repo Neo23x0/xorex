@@ -26,11 +26,11 @@ XOR Key Evaluator for Encrypted Executables
       
 ## The Idea
 
-The idea is to run some statistical analysis on the file to extract possible keys based on their frequency of occurrence. Since Portable Executables (PE files) often contain ranges of binary zeros, we can assume that we find the XOR key more often than other byte chains.
+Xorex is a tool designed for performing statistical analysis on files to extract potential XOR keys based on their frequency of occurrence. Given that Portable Executable (PE) files often contain sections with sequences of binary zeros, the XOR key can often be identified by its frequent appearance in the file.
 
-I validate the possible candidates by applying them to a portion of the data blob looking for typical MS-DOS header stubs. 
+To identify potential XOR keys, Xorex first performs an analysis of the file's byte distribution. The tool then validates these candidates by applying them to a portion of the data, searching for typical MS-DOS header stubs.
 
-Furthermore, I then try to find a MZ header in order to detect junk code or shellcode before the actual PE file, adjusting the offset and rotating the preliminary XOR key to its more likely version. 
+Additionally, Xorex attempts to locate an MZ header, which can help detect junk code or shellcode preceding the actual PE file. This process allows the tool to adjust the offset and refine the preliminary XOR key to a more accurate version.
 
 ## Get Started
 
